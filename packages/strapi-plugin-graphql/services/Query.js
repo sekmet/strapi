@@ -52,13 +52,13 @@ module.exports = {
   amountLimiting: (params = {}) => {
     const { amountLimit } = strapi.plugins.graphql.config;
 
-    if(!amountLimit) return params;
+    if (!amountLimit) return params;
 
     if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
       params.limit = amountLimit;
     } else if (params.limit < 0) {
       params.limit = 0;
-    } 
+    }
 
     return params;
   },
@@ -69,7 +69,7 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeQueryResolver: function(_schema, plugin, name, isSingular) {
+  composeQueryResolver: function({ _schema, plugin, name, isSingular }) {
     const params = {
       model: name,
     };
@@ -236,7 +236,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
