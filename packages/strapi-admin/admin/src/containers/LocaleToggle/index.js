@@ -10,19 +10,16 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-
 import {
   ButtonDropdown,
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
 } from 'reactstrap';
-
 import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
 import { languages } from '../../i18n';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 export class LocaleToggle extends React.Component {
   // eslint-disable-line
@@ -35,6 +32,7 @@ export class LocaleToggle extends React.Component {
       case 'pt-BR':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/br.svg';
       case 'zh':
+        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/tw.svg';
       case 'zh-Hans':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';
       case 'ar':
@@ -55,12 +53,12 @@ export class LocaleToggle extends React.Component {
       currentLocale: { locale },
       className,
     } = this.props;
-    const style = cn(styles.localeDropdownMenu, styles[className]);
+    const style = cn('localeDropdownMenu', className);
 
     return (
-      <div className={styles.localeToggle}>
+      <Wrapper>
         <ButtonDropdown isOpen={this.state.isOpen} toggle={this.toggle}>
-          <DropdownToggle className={styles.localeDropdownContent}>
+          <DropdownToggle className="localeDropdownContent">
             <span>{locale}</span>
             <img src={this.getFlagUrl(locale)} alt={locale} />
           </DropdownToggle>
@@ -71,8 +69,8 @@ export class LocaleToggle extends React.Component {
                 key={language}
                 onClick={() => this.props.changeLocale(language)}
                 className={cn(
-                  styles.localeToggleItem,
-                  locale === language ? styles.localeToggleItemActive : ''
+                  'localeToggleItem',
+                  locale === language ? 'localeToggleItemActive' : ''
                 )}
               >
                 {language.toUpperCase()}
@@ -80,7 +78,7 @@ export class LocaleToggle extends React.Component {
             ))}
           </DropdownMenu>
         </ButtonDropdown>
-      </div>
+      </Wrapper>
     );
   }
 }
