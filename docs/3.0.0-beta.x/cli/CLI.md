@@ -2,8 +2,6 @@
 
 Strapi comes with a full featured Command Line Interface (CLI) which lets you scaffold and manage your project in seconds.
 
----
-
 ## strapi new
 
 Create a new project.
@@ -11,7 +9,7 @@ Create a new project.
 ```bash
 strapi new <name>
 
-options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
+options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
 ```
 
 - **strapi new &#60;name&#62;**<br/>
@@ -22,6 +20,9 @@ options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
   Use the quickstart system to create your app.
+
+- **strapi new &#60;name&#62; --quickstart --no-run**<br/>
+  Use the quickstart system to create your app, and do not start the application after creation.
 
 - **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62; --dbssl=&#60;dbssl&#62; --dbauth=&#60;dbauth&#62; --dbforce**<br/>
 
@@ -49,7 +50,7 @@ options: [--no-build |--watch-admin ]
 - **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
 
-::: note
+::: tip
 You should never use this command to run a Strapi application in production.
 :::
 
@@ -60,7 +61,7 @@ Start a Strapi application with autoReload disabled.
 This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
 Certain features are disabled in the `strapi start` mode because they require application restarts.
 
-::: note
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -76,11 +77,13 @@ options: [--no-optimization]
 ```
 
 - **strapi build**<br/>
-  Builds the administration panel without minimizing the assets
+  Builds the administration panel and minimizing the assets
+- **strapi build --clean**<br/>
+  Builds the administration panel and delete the previous build and .cache folders
 - **strapi build --no-optimization**<br/>
-  Builds the administration panel without minizing the assets. The build duration is faster.
+  Builds the administration panel without minimizing the assets. The build duration is faster.
 
-::: note
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -92,7 +95,7 @@ Scaffold a complete API with its configurations, controller, model and service.
 ```bash
 strapi generate:api <name> [<attribute:type>]
 
-options: [--tpl <name>|--plugin <name>]
+options: [--plugin <name>]
 ```
 
 - **strapi generate:api &#60;name&#62;**<br/>
@@ -108,12 +111,7 @@ options: [--tpl <name>|--plugin <name>]
 
   Example: `strapi generate:api product --plugin content-manager`
 
-- **strapi generate:api &#60;name&#62; --tpl &#60;template&#62;**<br/>
-  Generates an API called **&#60;name&#62;** in the `./api` folder which works with the given **&#60;template&#62;**. By default, the generated APIs are based on Mongoose.
-
-  Example: `strapi generate:api product --tpl bookshelf`
-
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -140,7 +138,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:controller &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty controller called **&#60;name&#62;** in the `./plugins/<plugin>/controllers` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -176,7 +174,7 @@ options: [--api <name>|--plugin <name>]
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -203,7 +201,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:service &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty service called **&#60;name&#62;** in the `./plugins/<plugin>/services` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -245,8 +243,6 @@ strapi generate:plugin <name>
 
 Please refer to the [local plugins](../plugin-development/quick-start.md) section to know more.
 
----
-
 ## strapi install
 
 Install a plugin in the project.
@@ -263,8 +259,6 @@ strapi install <name>
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
-
----
 
 ## strapi uninstall
 
@@ -284,13 +278,19 @@ options [--delete-files]
 - **strapi uninstall &#60;name&#62; --delete-files**<br/>
   Uninstalls a plugin called **&#60;name&#62;** and removes the files in `./extensions/name/`
 
-  Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
+  Example: `strapi uninstall graphql --delete-files` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
 
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
 
----
+## strapi console
+
+Start the server and eval commands in your application in real time.
+
+```bash
+strapi console
+```
 
 ## strapi version
 
@@ -299,8 +299,6 @@ Print the current globally installed Strapi version.
 ```bash
 strapi version
 ```
-
----
 
 ## strapi help
 

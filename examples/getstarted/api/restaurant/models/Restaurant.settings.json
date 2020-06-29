@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "collectionName": "restaurants",
   "info": {
     "name": "restaurant",
@@ -7,10 +6,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -20,60 +16,88 @@
       "minLength": 5,
       "type": "string"
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
+    },
+    "price_range": {
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "type": "enumeration"
+    },
+    "closing_period": {
+      "component": "default.closingperiod",
+      "type": "component"
+    },
+    "contact_email": {
+      "type": "email"
+    },
+    "stars": {
+      "required": true,
+      "type": "integer",
+      "min": 0,
+      "max": 3
+    },
+    "averagePrice": {
+      "type": "float",
+      "min": 0,
+      "max": 35.12
+    },
+    "address": {
+      "model": "address"
+    },
     "cover": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
+    },
+    "timestamp": {
+      "type": "timestamp"
     },
     "images": {
       "collection": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
+    },
+    "short_description": {
+      "type": "text"
+    },
+    "since": {
+      "type": "date"
+    },
+    "categories": {
+      "collection": "category"
+    },
+    "description": {
+      "type": "richtext",
+      "required": true,
+      "minLength": 10
+    },
+    "services": {
+      "component": "default.restaurantservice",
+      "repeatable": true,
+      "type": "component"
     },
     "menu": {
       "model": "menu",
       "via": "restaurant"
     },
-    "categories": {
-      "collection": "category"
-    },
-    "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
-      "type": "enumeration"
-    },
-    "description": {
-      "type": "richtext",
-      "required": true
-    },
     "opening_times": {
-      "group": "openingtimes",
-      "type": "group",
-      "required": true,
+      "component": "default.openingtimes",
+      "type": "component",
       "repeatable": true,
       "min": 1,
       "max": 10
     },
-    "closing_period": {
-      "group": "closingperiod",
-      "type": "group"
-    },
-    "services": {
-      "group": "restaurantservice",
-      "required": true,
-      "repeatable": true,
-      "type": "group"
-    },
-    "address": {
-      "model": "address"
-    },
-    "short_description": {
-      "type": "text"
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.openingtimes",
+        "default.restaurantservice",
+        "default.closingperiod",
+        "default.dish"
+      ]
     }
   }
 }

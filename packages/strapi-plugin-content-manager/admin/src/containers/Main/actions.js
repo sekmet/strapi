@@ -1,9 +1,7 @@
 import {
   DELETE_LAYOUT,
   DELETE_LAYOUTS,
-  GET_DATA,
   GET_DATA_SUCCEEDED,
-  GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
@@ -23,26 +21,12 @@ export function deleteLayouts() {
   };
 }
 
-export function getData() {
-  return {
-    type: GET_DATA,
-  };
-}
-
-export function getDataSucceeded(groups, models, mainFields) {
+export function getDataSucceeded(components, models, mainFields) {
   return {
     type: GET_DATA_SUCCEEDED,
-    groups,
+    components,
     models: models.filter(model => model.isDisplayed === true),
     mainFields,
-  };
-}
-
-export function getLayout(uid, source) {
-  return {
-    type: GET_LAYOUT,
-    uid,
-    source,
   };
 }
 
@@ -54,10 +38,11 @@ export function getLayoutSucceeded(layout, uid) {
   };
 }
 
-export function onChangeListLabels({ target: { name, value } }) {
+export function onChangeListLabels({ target: { name, slug, value } }) {
   return {
     type: ON_CHANGE_LIST_LABELS,
-    keys: name.split('.'),
+    name,
+    slug,
     value,
   };
 }

@@ -1,6 +1,38 @@
 import styled, { keyframes } from 'styled-components';
 
+const fadeIn = keyframes`
+0% {
+  width: auto;
+  height: auto;
+  opacity: 0;
+}
+
+5% {
+  opacity: 0;
+}
+
+100% {
+  opacity: 1;
+}
+`;
+const fadeOut = keyframes`
+0% {
+  opacity: 1;
+}
+
+60% {
+  opacity: 0;
+}
+
+100% {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+`;
+
 const Wrapper = styled.div`
+  max-width: ${({ isOpen }) => (isOpen ? 'initial' : '0px')};
   position: fixed;
   right: 15px;
   bottom: 15px;
@@ -14,7 +46,7 @@ const Wrapper = styled.div`
     margin-bottom: 0;
   }
   .videosHeader {
-    padding: 25px 15px 0 15px;
+    padding: 25px 15px 18px 15px;
     p {
       display: inline-block;
       vertical-align: top;
@@ -53,11 +85,14 @@ const Wrapper = styled.div`
       min-width: 0;
       animation: ${fadeOut} 0.5s forwards;
     }
-
     ul {
-      padding: 0 0 10px 0;
+      padding: 0 0 8px 0;
       margin-bottom: 0;
       list-style: none;
+      &:last-of-type {
+        padding: 8px 0 10px 0;
+        border-top: 1px solid #f6f6f6;
+      }
     }
   }
   .openBtn {
@@ -71,50 +106,26 @@ const Wrapper = styled.div`
       color: white;
       background: #0e7de7;
       box-shadow: 0px 2px 4px 0px rgba(227, 233, 243, 1);
-      i:last-of-type {
+      i,
+      svg {
+        margin: auto;
+      }
+      i:last-of-type,
+      svg:last-of-type {
         display: none;
       }
       &.active {
-        i:first-of-type {
+        i:first-of-type,
+        svg:first-of-type {
           display: none;
         }
-        i:last-of-type {
+        i:last-of-type,
+        svg:last-of-type {
           display: block;
         }
       }
     }
   }
-`;
-
-const fadeIn = keyframes`
-0% {
-  width: auto;
-  height: auto;
-  opacity: 0;
-}
-
-5% {
-  opacity: 0;
-}
-
-100% {
-  opacity: 1;
-}
-`;
-const fadeOut = keyframes`
-0% {
-  opacity: 1;
-}
-
-60% {
-  opacity: 0;
-}
-
-100% {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
 `;
 
 export default Wrapper;

@@ -6,9 +6,9 @@ By default Strapi create [REST endpoints](../content-api/api-endpoints) for each
 
 To get started with GraphQL in your app, please install the plugin first. To do that, open your terminal and run the following command:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn"
+::: tab yarn
 
 ```
 yarn strapi install graphql
@@ -16,7 +16,7 @@ yarn strapi install graphql
 
 :::
 
-::: tab "npm" id="npm"
+::: tab npm
 
 ```
 npm run strapi install graphql
@@ -24,7 +24,7 @@ npm run strapi install graphql
 
 :::
 
-::: tab "strapi" id="strapi"
+::: tab strapi
 
 ```
 strapi install graphql
@@ -36,7 +36,7 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (**GraphQL Playground**) that will help you to write GraphQL query to explore your data.
 
-::: note
+::: tip
 Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
 :::
 
@@ -46,7 +46,7 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 
 Security limits on maximum number of items in your response by default is limited to 100, however you can change this on the following config option `amountLimit`. This should only be changed after careful consideration of the drawbacks of a large query which can cause what would basically be a DDoS (Distributed Denial of Service). And may cause abnormal load on your Strapi server, as well as your database server.
 
-You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/engine/features/query-tracing.html).
+You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
 
 You can edit these configurations by creating following file.
 
@@ -71,7 +71,7 @@ In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enable
 
 - `id`: String
 
-```
+```graphql
 query {
   user(id: "5aafe871ad624b7380d7a224") {
     username
@@ -82,11 +82,28 @@ query {
 
 ### Fetch multiple entries
 
-```
+```graphql
 query {
   users {
     username
     email
+  }
+}
+```
+
+### Fetch dynamic zone data
+
+Dynamic zones are union types in graphql so you need to use fragments to query the fields.
+
+```graphql
+query {
+  restaurants {
+    dz {
+      __typename
+      ... on ComponentDefaultClosingperiod {
+        label
+      }
+    }
   }
 }
 ```
@@ -96,14 +113,9 @@ query {
 - `input`: Object
   - `data`: Object — Values to insert
 
-```
+```graphql
 mutation {
-  createUser(input: {
-    data: {
-      username: "John",
-      email: "john@doe.com"
-    }
-  }) {
+  createUser(input: { data: { username: "John", email: "john@doe.com" } }) {
     user {
       username
       email
@@ -114,15 +126,17 @@ mutation {
 
 The implementation of the mutations also supports relational attributes. For example, you can create a new `User` and attach many `Restaurant` to it by writing your query like this:
 
-```
+```graphql
 mutation {
-  createUser(input: {
-    data: {
-      username: "John",
-      email: "john@doe.com",
-      restaurants: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
+  createUser(
+    input: {
+      data: {
+        username: "John"
+        email: "john@doe.com"
+        restaurants: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
+      }
     }
-  }) {
+  ) {
     user {
       username
       email
@@ -142,17 +156,14 @@ mutation {
   - `where`: Object - Entry's ID to update
   - `data`: Object — Values to update
 
-```
+```graphql
 mutation {
-  updateUser(input: {
-    where: {
-      id: "5b28f1747c739e4afb48605c"
-    },
-    data: {
-      username: "John",
-      email: "john@doe.com"
+  updateUser(
+    input: {
+      where: { id: "5b28f1747c739e4afb48605c" }
+      data: { username: "John", email: "john@doe.com" }
     }
-  }) {
+  ) {
     user {
       username
       email
@@ -163,7 +174,7 @@ mutation {
 
 You can also update relational attributes by passing an ID or an array of IDs (depending on the relationship).
 
-```
+```graphql
 mutation {
   updateRestaurant(input: {
     where: {
@@ -188,13 +199,9 @@ mutation {
 - `input`: Object
   - `where`: Object - Entry's ID to delete
 
-```
+```graphql
 mutation {
-  deleteUser(input: {
-    where: {
-      id: "5b28f1747c739e4afb48605c"
-    }
-  }) {
+  deleteUser(input: { where: { id: "5b28f1747c739e4afb48605c" } }) {
     user {
       username
       email
@@ -225,16 +232,17 @@ You can also apply different parameters to the query to make more complex querie
 
 Return the second decade of users which have an email that contains `@strapi.io` ordered by username.
 
-```
+```graphql
 query {
-  users(limit: 10, start: 10, sort: "username:asc", where: {
-    email_contains: "@strapi.io"
-  }) {
+  users(limit: 10, start: 10, sort: "username:asc", where: { email_contains: "@strapi.io" }) {
     username
     email
-  },
-  restaurants(limit: 10, where: { _id_nin: ["5c4dad1a8f3845222ca88a56", "5c4dad1a8f3845222ca88a57"] }) {
-    _id,
+  }
+  restaurants(
+    limit: 10
+    where: { _id_nin: ["5c4dad1a8f3845222ca88a56", "5c4dad1a8f3845222ca88a57"] }
+  ) {
+    _id
     name
   }
 }
@@ -242,11 +250,9 @@ query {
 
 Return the users which have been created after the March, 19th 2018 4:21 pm.
 
-```
+```graphql
 query {
-  users(where: {
-    createdAt_gt: "2018-03-19 16:21:07.161Z"
-  }) {
+  users(where: { createdAt_gt: "2018-03-19 16:21:07.161Z" }) {
     username
     email
   }
@@ -256,6 +262,10 @@ query {
 ## Shadow CRUD
 
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
+
+::: tip NOTE
+If you use a local plugin, the controller methods of your plugin are not created by default. In order for the Shadow CRUD to work you have to define them in your controllers for each of your models. You can find examples of controllers `findOne`, `find`, `create`, `update` and `delete` there : [Core controllers](../concepts/controllers.html#core-controllers).
+:::
 
 ### Example
 
@@ -285,7 +295,7 @@ If you've generated an API called `Restaurant` using the CLI `strapi generate:ap
 
 The generated GraphQL type and queries will be:
 
-```
+```graphql
 // Restaurant's Type definition
 type Restaurant {
   _id: String
@@ -321,14 +331,14 @@ This feature is only available on Mongoose ORM.
 Strapi now supports Aggregation & Grouping.
 Let's consider again the model mentioned above:
 
-```
+```graphql
 type Restaurant {
   _id: ID
   createdAt: String
   updatedAt: String
   name: String
   description: String
-  nb_likes: Int,
+  nb_likes: Int
   open: Boolean
 }
 ```
@@ -337,7 +347,7 @@ Strapi will generate automatically for you the following queries & types:
 
 ### Aggregation
 
-```
+```graphql
 type RestaurantConnection {
   values: [Restaurant]
   groupBy: RestaurantGroupBy
@@ -382,43 +392,47 @@ type Query {
 
 Getting the total count and the average likes of restaurants:
 
-```
-restaurantsConnection {
-  aggregate {
-    count
-    avg {
-      nb_likes
+```graphql
+query {
+  restaurantsConnection {
+    aggregate {
+      count
+      avg {
+        nb_likes
+      }
     }
   }
-
 }
 ```
 
 Let's say we want to do the same query but for only open restaurants
 
-```
-restaurantsConnection(where: { open: true }) {
-  aggregate {
-    count
-    avg {
-      nb_likes
+```graphql
+query {
+  restaurantsConnection(where: { open: true }) {
+    aggregate {
+      count
+      avg {
+        nb_likes
+      }
     }
   }
-
 }
 ```
 
 Getting the average likes of open and non open restaurants
 
-```
-restaurantsConnection {
-  groupBy {
-    open: {
-      key
-      connection {
-        aggregate {
-          avg {
-            nb_likes
+```graphql
+query {
+  restaurantsConnection {
+    groupBy {
+      open {
+        key
+        connection {
+          aggregate {
+            avg {
+              nb_likes
+            }
           }
         }
       }
@@ -431,26 +445,26 @@ Result
 
 ```json
 {
-  data: {
-    restaurantsConnection: {
-      groupBy: {
-        open: [
+  "data": {
+    "restaurantsConnection": {
+      "groupBy": {
+        "open": [
           {
-            key: true,
-            connection: {
-              aggregate: {
-                avg {
-                  nb_likes: 10
+            "key": true,
+            "connection": {
+              "aggregate": {
+                "avg": {
+                  "nb_likes": 10
                 }
               }
             }
           },
           {
-            key: false,
-            connection: {
-              aggregate: {
-                avg {
-                  nb_likes: 0
+            "key": false,
+            "connection": {
+              "aggregate": {
+                "avg": {
+                  "nb_likes": 0
                 }
               }
             }
@@ -495,7 +509,7 @@ Let say we are using the same previous `Restaurant` model.
 
 ```js
 module.exports = {
-  definition: `
+  definition:`
     enum RestaurantStatusInput {
       work
       open
@@ -507,12 +521,12 @@ module.exports = {
   `,
   mutation: `
     attachRestaurantToChef(id: ID, chefID: ID): Restaurant!
-  `
+  `,
   resolver: {
     Query: {
       restaurant: {
         description: 'Return a single restaurant',
-        policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'], // Apply the 'isAuthenticated' policy of the `Users & Permissions` plugin, then the 'isOwner' policy before executing the resolver.
+        policies: ['plugins::users-permissions.isAuthenticated', 'isOwner'], // Apply the 'isAuthenticated' policy of the `Users & Permissions` plugin, then the 'isOwner' policy before executing the resolver.
       },
       restaurants: {
         description: 'Return a list of restaurants', // Add a description to the query.
@@ -520,11 +534,11 @@ module.exports = {
       },
       restaurantsByChef: {
         description: 'Return the restaurants open by the chef',
-        resolver: 'Restaurant.findByChef'
+        resolver: 'application::restaurant.restaurant.findByChef'
       },
       restaurantsByCategories: {
         description: 'Return the restaurants open by the category',
-        resolverOf: 'Restaurant.findByCategories', // Will apply the same policy on the custom resolver as the controller's action `findByCategories`.
+        resolverOf: 'application::restaurant.restaurant.findByCategories', // Will apply the same policy on the custom resolver as the controller's action `findByCategories`.
         resolver: (obj, options, ctx) => {
           // ctx is the context of the Koa request.
           await strapi.controllers.restaurants.findByCategories(ctx);
@@ -536,8 +550,8 @@ module.exports = {
     Mutation: {
       attachRestaurantToChef: {
         description: 'Attach a restaurant to an chef',
-        policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'],
-        resolver: 'Restaurant.attachToChef'
+        policies: ['plugins::users-permissions.isAuthenticated', 'isOwner'],
+        resolver: 'application::restaurant.restaurant.attachToChef'
       }
     }
   }
@@ -548,7 +562,7 @@ module.exports = {
 
 Edit the `definition` attribute in one of the `schema.graphql` files of your project by using the GraphQL Type language string.
 
-::: note
+::: tip
 The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customise anything.
 :::
 
@@ -598,14 +612,14 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller.
+        resolver: 'application::person.person.findOne' // It will use the action `findOne` located in the `Person.js` controller.
       }
     }
   }
 };
 ```
 
-::: note
+::: tip
 The resolver parameter also accepts an object as a value to target a controller located in a plugin.
 :::
 
@@ -616,10 +630,7 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: {
-          plugin: 'users-permissions',
-          handler: 'User.findOne' // It will use the action `findOne` located in the `Person.js` controller inside the plugin `Users & Permissions`.
-        }
+        resolver: 'plugins::users-permissions.user.findOne'
       }
     }
   }
@@ -698,19 +709,17 @@ module.exports = {
       restaurants: {
         description: 'Return a list of restaurants',
         policies: [
-          'plugins.users-permissions.isAuthenticated',
-          'isOwner',
-          'global.logging',
+          'plugins::users-permissions.isAuthenticated',
+          'isOwner', // will try to find the policy declared in the same api as this schema file.
+          'application::otherapi.isMember',
+          'global::logging',
         ],
       },
     },
     Mutation: {
       createRestaurant: {
         description: 'Create a new restaurant',
-        policies: [
-          'plugins.users-permissions.isAuthenticated',
-          'global.logging',
-        ],
+        policies: ['plugins::users-permissions.isAuthenticated', 'global::logging'],
       },
     },
   },
@@ -719,7 +728,7 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Restaurant` API `./api/restaurant/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-::: note
+::: tip
 There is no custom resolver in that case, so it will execute the default resolver (Restaurant.find) provided by the Shadow CRUD feature.
 :::
 
@@ -733,13 +742,13 @@ module.exports = {
     Query: {
       restaurants: {
         description: 'Return a list of restaurants by chef',
-        resolver: 'Restaurant.findByChef',
+        resolver: 'application::restaurant.restaurant.findByChef',
       },
     },
     Mutation: {
       createRestaurant: {
         description: 'Create a new restaurant',
-        resolver: 'Restaurant.customCreate',
+        resolver: 'application::restaurant.restaurant.customCreate',
       },
     },
   },
@@ -748,13 +757,13 @@ module.exports = {
 
 In this example, it will execute the `findByChef` action of the `Restaurant` controller. It also means that the resolver will apply on the `restaurants` query the permissions defined on the `findByChef` action (through the administration panel).
 
-::: note
+::: tip
 The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
 :::
 
 The same process is also applied for the `createRestaurant` mutation. It will execute the `customCreate` action of the `Restaurant` controller.
 
-::: note
+::: tip
 The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
 :::
 
@@ -805,7 +814,7 @@ module.exports = {
     Query: {
       restaurants: {
         description: 'Return a list of restaurants by chef',
-        resolverOf: 'Restaurant.find', // Will apply the same policy on the custom resolver as the controller's action `find` located in `Restaurant.js`.
+        resolverOf: 'application::restaurant.restaurant.find', // Will apply the same policy on the custom resolver as the controller's action `find` located in `Restaurant.js`.
         resolver: (obj, options, context) => {
           // You can return a raw JSON object or a promise.
 
@@ -819,7 +828,7 @@ module.exports = {
     Mutation: {
       updateRestaurant: {
         description: 'Update an existing restaurant',
-        resolverOf: 'Restaurant.update', // Will apply the same policy on the custom resolver than the controller's action `update` located in `Restaurant.js`.
+        resolverOf: 'application::restaurant.restaurant.update', // Will apply the same policy on the custom resolver than the controller's action `update` located in `Restaurant.js`.
         resolver: (obj, options, { context }) => {
           const where = context.params;
           const data = context.request.body;
@@ -863,7 +872,7 @@ The type name is the global ID of the model. You can find the global ID of a mod
 
 We recommend putting the field description and deprecated reason in the model. Right now, the GraphQL plugin is the only which uses these fields. Another plugin could use this description in the future as well. However, sometimes you don't have the choice, especially when you're defining a custom type.
 
-::: note
+::: tip
 It's not a bad practice to put the description and deprecated attribute in the `schema.graphql`, though.
 :::
 

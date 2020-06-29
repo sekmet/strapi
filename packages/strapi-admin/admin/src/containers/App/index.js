@@ -14,20 +14,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
+
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
+import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
+// eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
 import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
 
 import { Content, Wrapper } from './components';
-
-import GlobalStyle from '../../components/GlobalStyle';
 
 import { getDataSucceeded } from './actions';
 
@@ -41,8 +42,28 @@ function App(props) {
       try {
         const requestURL = '/users-permissions/init';
 
-        const { hasAdmin } = await request(requestURL, { method: 'GET' });
+        const { hasAdmin } = await request(requestURL, { method: 'GET' }, false, false, {
+          noAuth: true,
+        });
         const { data } = await request('/admin/init', { method: 'GET' });
+        const { uuid } = data;
+
+        if (uuid) {
+          try {
+            fetch('https://analytics.strapi.io/track', {
+              method: 'POST',
+              body: JSON.stringify({
+                event: 'didInitializeAdministration',
+                uuid,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          } catch (e) {
+            // Silent.
+          }
+        }
 
         getDataRef.current(hasAdmin, data);
         setState({ hasAdmin, isLoading: false });
@@ -67,9 +88,7 @@ function App(props) {
           <Switch>
             <Route
               path="/auth/:authType"
-              render={routerProps => (
-                <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />
-              )}
+              render={routerProps => <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />}
               exact
             />
             <PrivateRoute path="/" component={Admin} />
@@ -89,10 +108,7 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators({ getDataSucceeded }, dispatch);
 }
 
-const withConnect = connect(
-  null,
-  mapDispatchToProps
-);
+const withConnect = connect(null, mapDispatchToProps);
 
 export default compose(withConnect)(App);
 export { App };

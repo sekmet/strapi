@@ -28,7 +28,8 @@ const Wrapper = styled.div`
       line-height: 36px;
     }
 
-    i {
+    i,
+    svg {
       margin-left: 7px;
       color: #b3b5b9;
       font-size: 1rem;
@@ -70,7 +71,8 @@ const Wrapper = styled.div`
     font-size: 1.3rem;
     font-style: italic;
 
-    > i {
+    > i,
+    > svg {
       margin-right: 7px;
       font-size: 12px;
     }
@@ -83,9 +85,11 @@ const Wrapper = styled.div`
     font-weight: 500;
     cursor: pointer;
 
-    > i {
+    > i,
+    > svg {
       margin-right: 7px;
-      font-size: 12px;
+      font-size: 11px;
+      vertical-align: inherit;
     }
   }
 
@@ -95,16 +99,13 @@ const Wrapper = styled.div`
     padding: 0 15px;
     margin: 0;
     border-radius: 2px !important;
-    line-height: 24px;
+    line-height: 23px;
     font-size: 13px;
-    font-weight: 500 !important;
     cursor: pointer;
-
     span {
       display: inline-block;
       width: 100%;
       height: 100%;
-      line-height: 24px;
     }
   }
 

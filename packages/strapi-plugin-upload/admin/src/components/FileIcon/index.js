@@ -6,46 +6,28 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { trim } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import ext from './extensions.json';
+import extensions from './utils/extensions.json';
+
 import Wrapper from './Wrapper';
 
-function FileIcon({ fileType }) {
-  const iconType = (() => {
-    switch (true) {
-      case ext.archive.includes(trim(fileType, '.')):
-        return 'file-archive-o';
-      case ext.code.includes(trim(fileType, '.')):
-        return 'file-code-o';
-      case ext.img.includes(trim(fileType, '.')):
-        return 'file-image-o';
-      case ext.pdf.includes(trim(fileType, '.')):
-        return 'file-pdf-o';
-      case ext.powerpoint.includes(trim(fileType, '.')):
-        return 'file-powerpoint-o';
-      case ext.video.includes(trim(fileType, '.')):
-        return 'file-video-o';
-      case ext.word.includes(trim(fileType, '.')):
-        return 'file-word-o';
-      default:
-        return 'file';
-    }
-  })();
+const FileIcon = ({ ext }) => {
+  const iconName = Object.keys(extensions).find(key => extensions[key].includes(ext)) || 'alt';
 
   return (
-    <Wrapper type={iconType}>
-      <i className={`fa fa-${iconType}`} />
+    <Wrapper type="file" colored={iconName === 'pdf'}>
+      <FontAwesomeIcon icon={['far', `file-${iconName}`]} />
     </Wrapper>
   );
-}
+};
 
 FileIcon.defaultProps = {
-  fileType: 'zip',
+  ext: 'alt',
 };
 
 FileIcon.propTypes = {
-  fileType: PropTypes.string,
+  ext: PropTypes.string,
 };
 
 export default FileIcon;

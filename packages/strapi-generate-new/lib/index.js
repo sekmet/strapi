@@ -23,10 +23,7 @@ module.exports = (projectDirectory, cliArguments) => {
 
   const rootPath = resolve(projectDirectory);
 
-  const tmpPath = join(
-    os.tmpdir(),
-    `strapi${crypto.randomBytes(6).toString('hex')}`
-  );
+  const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
   const useNpm = cliArguments.useNpm !== undefined;
 
@@ -39,7 +36,8 @@ module.exports = (projectDirectory, cliArguments) => {
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
-    uuid: uuid(),
+    docker: process.env.DOCKER === 'true',
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
     deviceId: machineIdSync(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
@@ -65,6 +63,7 @@ module.exports = (projectDirectory, cliArguments) => {
       os_release: os.release(),
       strapi_version: scope.strapiVersion,
       node_version: process.version,
+      docker: scope.docker,
     };
 
     Object.keys(tags).forEach(tag => {

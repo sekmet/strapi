@@ -4,43 +4,33 @@ import PropTypes from 'prop-types';
 import { capitalize, get } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { PluginHeader } from 'strapi-helper-plugin';
+import { PluginHeader, getFilterType } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
-import getFilterType from '../FilterPickerOption/utils';
-import { Flex, Span, Wrapper } from './components';
 import FilterPickerOption from '../FilterPickerOption';
+import { Flex, Span, Wrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'group', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = ['json', 'component', 'relation', 'media', 'richtext'];
 
-function FilterPicker({
-  actions,
-  isOpen,
-  name,
-  onSubmit,
-  toggleFilterPickerState,
-}) {
+function FilterPicker({ actions, isOpen, name, onSubmit, toggleFilterPickerState }) {
   const { schema, searchParams } = useListView();
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
 
-      return (
-        !NOT_ALLOWED_FILTERS.includes(current.type) &&
-        current.type !== undefined
-      );
+      return !NOT_ALLOWED_FILTERS.includes(current.type) && current.type !== undefined;
     })
     .sort()
     .map(attr => {
       const current = get(schema, ['attributes', attr], {});
 
-      return { name: attr, type: current.type };
+      return { name: attr, type: current.type, options: current.enum || null };
     });
 
   const [state, dispatch] = useReducer(reducer, initialState, () =>
@@ -56,9 +46,7 @@ function FilterPicker({
   };
 
   const renderTitle = () => (
-    <FormattedMessage
-      id={`${pluginId}.components.FiltersPickWrapper.PluginHeader.title.filter`}
-    >
+    <FormattedMessage id={`${pluginId}.components.FiltersPickWrapper.PluginHeader.title.filter`}>
       {message => (
         <span>
           {capitalize(name)}&nbsp;-&nbsp;
@@ -72,13 +60,17 @@ function FilterPicker({
   const getInitialFilter = () => {
     const type = get(allowedAttributes, [0, 'type'], '');
     const [filter] = getFilterType(type);
+
     let value = '';
 
     if (type === 'boolean') {
       value = 'true';
     } else if (type === 'number') {
       value = 0;
+    } else if (type === 'enumeration') {
+      value = get(allowedAttributes, [0, 'options', 0], '');
     }
+
     const initFilter = {
       name: get(allowedAttributes, [0, 'name'], ''),
       filter: filter.value,
@@ -90,8 +82,7 @@ function FilterPicker({
   // Set the filters when the collapse is opening
   const handleEntering = () => {
     const currentFilters = searchParams.filters;
-    const initialFilters =
-      currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
+    const initialFilters = currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
 
     dispatch({
       type: 'SET_FILTERS',
@@ -147,6 +138,7 @@ function FilterPicker({
                 }}
                 type={get(schema, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
+                // eslint-disable-next-line react/no-array-index-key
                 key={key}
               />
             ))}
@@ -174,8 +166,7 @@ FilterPicker.propTypes = {
   isOpen: PropTypes.bool,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  }),
-
+  }).isRequired,
   name: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,

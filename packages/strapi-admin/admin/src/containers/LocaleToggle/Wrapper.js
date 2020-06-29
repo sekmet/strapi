@@ -28,7 +28,8 @@ const Wrapper = styled.div`
         background-color: #fafafb !important;
       }
 
-      > i {
+      > i,
+      > svg {
         margin-left: 10px;
         transition: transform 0.3s ease-out;
 
@@ -71,7 +72,6 @@ const Wrapper = styled.div`
     border: none !important;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    overflow: hidden;
     box-shadow: 0 1px 4px 0px rgba(40, 42, 49, 0.05);
 
     &:before {
@@ -113,7 +113,8 @@ const Wrapper = styled.div`
     > button:not(:first-child) {
       height: 36px;
       line-height: 36px;
-      > i {
+      > i,
+      > svg {
         margin-left: 10px;
       }
     }

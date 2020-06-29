@@ -8,7 +8,8 @@ const Wrapper = styled.div`
     height: 26px;
     padding-left: 15px;
     line-height: 26px;
-    i {
+    i,
+    svg {
       display: none;
       position: absolute;
       top: 8px;
@@ -20,7 +21,8 @@ const Wrapper = styled.div`
       if (value) {
         return css`
           &:hover {
-            > i {
+            > i,
+            > svg {
               display: block;
             }
           }
@@ -28,14 +30,18 @@ const Wrapper = styled.div`
       }
     }}
 
+    &:hover {
+      background-color: #e9eaeb;
+    }
     &.highlighted {
       border-radius: 3px;
       background-color: #e9eaeb;
       font-weight: 600;
     }
     &.highlighted,
-    &.is-checked:hover {
-      > i {
+    &:hover {
+      > i,
+      > svg {
         display: block;
       }
     }
@@ -68,12 +74,14 @@ const Label = styled.label`
       left: 17px;
       font-size: 10px;
       font-family: 'FontAwesome';
-      font-weight: 100;
       color: #1c5de7;
       transition: all 0.2s;
     }
-    &:hover + i {
-      display: block;
+    &:hover {
+      & + i,
+      & + svg {
+        display: block;
+      }
     }
   }
 `;

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import styled, { css } from 'styled-components';
 
 const Block = styled.div`
@@ -8,7 +9,7 @@ const Block = styled.div`
   padding: 19px 30px 30px 30px;
   box-shadow: 0 2px 4px 0 #e3e9f3;
   border-radius: 3px;
-  line-heigth: 18px;
+  line-height: 18px;
 
   a {
     position: relative;
@@ -104,8 +105,8 @@ const ALink = styled.a`
   }
 
   &:hover,
-  focus,
-  active {
+  :focus,
+  :active {
     text-decoration: none;
     outline: 0;
   }
@@ -178,8 +179,8 @@ const LinkWrapper = styled.a`
   background-color: #f7f8f8;
 
   &:hover,
-  focus,
-  active {
+  :focus,
+  :active {
     text-decoration: none;
     outline: 0;
   }
@@ -212,12 +213,12 @@ const LinkWrapper = styled.a`
     &:first-child {
       font-size: 16px;
     }
-    color: #919BAE;
+    color: #919bae;
     text-overflow: ellipsis;
     overflow: hidden;
   }
   .bold {
-    color: #333740
+    color: #333740;
     font-weight: 600;
   }
 `;
@@ -256,13 +257,4 @@ const SocialLinkWrapper = styled.div`
   }
 `;
 
-export {
-  ALink,
-  Block,
-  Container,
-  LinkWrapper,
-  P,
-  Separator,
-  SocialLinkWrapper,
-  Wave,
-};
+export { ALink, Block, Container, LinkWrapper, P, Separator, SocialLinkWrapper, Wave };

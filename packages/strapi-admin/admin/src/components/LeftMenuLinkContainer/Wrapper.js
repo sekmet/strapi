@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   padding-top: 0.7rem;
   position: absolute;
-  top: 60px;
+  top: ${props => props.theme.main.sizes.leftMenu.height};
   right: 0;
   bottom: 0;
   left: 0;
   overflow-y: auto;
-  height: calc(100vh - (6rem + 10.2rem));
+  height: calc(100vh - (${props => props.theme.main.sizes.leftMenu.height} + 3rem));
   box-sizing: border-box;
 
   .title {
@@ -28,6 +28,12 @@ const Wrapper = styled.div`
     list-style: none;
     padding: 0;
     margin-bottom: 2rem;
+    &.models-list {
+      li a svg {
+        font-size: 0.74rem;
+        top: calc(50% - 0.35rem);
+      }
+    }
   }
 
   .noPluginsInstalled {

@@ -1,43 +1,26 @@
 'use strict';
 
-module.exports = ({ connection, env }) => {
-  // Production/Staging Template
-  if (['production', 'staging'].includes(env)) {
-    // All available settings (bookshelf and mongoose)
-    const settingsBase = {
-      client: connection.settings.client,
-      host: "${process.env.DATABASE_HOST || '127.0.0.1'}",
-      port: '${process.env.DATABASE_PORT || 27017}',
-      srv: '${process.env.DATABASE_SRV || false}',
-      database: "${process.env.DATABASE_NAME || 'strapi'}",
-      username: "${process.env.DATABASE_USERNAME || ''}",
-      password: "${process.env.DATABASE_PASSWORD || ''}",
-      ssl: '${process.env.DATABASE_SSL || false}',
-    };
+const _ = require('lodash');
 
-    // All available options (bookshelf and mongoose)
-    const optionsBase = {
-      ssl: '${process.env.DATABASE_SSL || false}',
-      authenticationDatabase:
-        "${process.env.DATABASE_AUTHENTICATION_DATABASE || ''}",
-    };
+const fs = require('fs');
+const path = require('path');
 
-    return {
-      defaultConnection: 'default',
-      connections: {
-        default: {
-          connector: connection.connector,
-          settings: settingsBase,
-          options: optionsBase,
-        },
-      },
-    };
-  }
+module.exports = ({ connection, client }) => {
+  const { settings, options } = connection;
 
-  return {
-    defaultConnection: 'default',
-    connections: {
-      default: connection,
+  const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
+  const compile = _.template(tmpl);
+
+  return compile({
+    settings: {
+      ...settings,
+      srv: settings.srv || false,
+      ssl: settings.ssl || false,
     },
-  };
+    options: {
+      ...options,
+      ssl: options.ssl || false,
+      authenticationDatabase: options.authenticationDatabase || null,
+    },
+  });
 };

@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "collectionName": "menus",
   "info": {
     "name": "menu",
@@ -19,8 +18,8 @@
       "via": "menu"
     },
     "restaurant": {
-      "model": "restaurant",
-      "via": "menu"
+      "via": "menu",
+      "model": "restaurant"
     }
   }
 }

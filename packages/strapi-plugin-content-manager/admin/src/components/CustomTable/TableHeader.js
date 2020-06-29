@@ -1,9 +1,11 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
-import { Icon, Thead } from './styledComponents';
+import { Arrow, Thead } from './styledComponents';
+
+/* eslint-disable jsx-a11y/control-has-associated-label */
 
 function TableHeader({ headers, isBulkable }) {
   const {
@@ -26,10 +28,7 @@ function TableHeader({ headers, isBulkable }) {
               isAll
               name="all"
               onChange={onChangeBulkSelectall}
-              value={
-                data.length === entriesToDelete.length &&
-                entriesToDelete.length > 0
-              }
+              value={data.length === entriesToDelete.length && entriesToDelete.length > 0}
             />
           </th>
         )}
@@ -40,8 +39,7 @@ function TableHeader({ headers, isBulkable }) {
               onClick={() => {
                 if (header.sortable) {
                   const isCurrentSort = header.name === sortBy;
-                  const nextOrder =
-                    isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+                  const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
                   let value = `${header.name}:${nextOrder}`;
 
                   if (isCurrentSort && sortOrder === 'DESC') {
@@ -59,17 +57,15 @@ function TableHeader({ headers, isBulkable }) {
             >
               <span className={header.sortable ? 'sortable' : ''}>
                 {header.label}
+
                 {sortBy === header.name && (
-                  <Icon
-                    className="fa fa-sort-asc"
-                    isAsc={sortOrder === 'ASC'}
-                  />
+                  <Arrow fill="#212529" isUp={sortOrder === 'ASC' && 'isAsc'} />
                 )}
               </span>
             </th>
           );
         })}
-        <th></th>
+        <th />
       </tr>
     </Thead>
   );

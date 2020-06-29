@@ -3,13 +3,14 @@
  * Notification
  *
  */
-
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Remove } from '@buffetjs/icons';
 import Li, { GlobalNotification } from './Li';
-
 class Notification extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   handleCloseClicked = () => {
@@ -18,40 +19,35 @@ class Notification extends React.Component {
 
   options = {
     success: {
-      icon: 'fa-check',
+      icon: 'check',
       title: 'Success',
       class: 'notificationSuccess',
     },
     warning: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Warning',
       class: 'notificationWarning',
     },
     error: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Error',
       class: 'notificationError',
     },
     info: {
-      icon: 'fa-info',
+      icon: 'info',
       title: 'Info',
       class: 'notificationInfo',
     },
   };
 
   render() {
-    const options =
-      this.options[this.props.notification.status] || this.options.info;
+    const options = this.options[this.props.notification.status] || this.options.info;
     const {
       notification: { message },
     } = this.props;
     const content =
       isObject(message) && message.id ? (
-        <FormattedMessage
-          id={message.id}
-          defaultMessage={message.id}
-          values={message.values}
-        />
+        <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
       ) : (
         <FormattedMessage id={message} defaultMessage={message} />
       );
@@ -64,14 +60,17 @@ class Notification extends React.Component {
           className={`${options.class}`}
           onClick={this.handleCloseClicked}
         >
-          <i className={`fa ${options.icon} notificationIcon`} />
+          <div className={`notificationIcon`}>
+            <div>
+              <FontAwesomeIcon icon={options.icon} />
+            </div>
+          </div>
           <div className="notificationContent">
             <p className="notificationTitle">{content}</p>
           </div>
-          <i
-            className="fa fa-close notificationClose"
-            onClick={this.handleCloseClicked}
-          />
+          <div className={`notificationClose`}>
+            <Remove onClick={this.handleCloseClicked} />
+          </div>
         </Li>
       </>
     );

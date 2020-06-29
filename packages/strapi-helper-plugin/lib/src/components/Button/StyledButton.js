@@ -1,5 +1,4 @@
 import styled, { css, keyframes } from 'styled-components';
-import Trash from '../../assets/icons/icon_trash.svg';
 
 const back = css`
   padding: 0 15px;
@@ -26,7 +25,7 @@ const primary = css`
   min-width: 14rem;
   font-weight: 500;
   border: 1px solid;
-  background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
+  background-color: #007eff;
   -webkit-font-smoothing: antialiased;
   color: white;
   &:active {
@@ -74,16 +73,7 @@ const deleteStyle = css`
   color: #f23508;
   border: 0.1rem solid rgba(255, 0, 0, 0.2);
   border-radius: 3px;
-  &:before {
-    content: '';
-    display: inline-block;
-    vertical-align: middle;
-    width: 11px;
-    height: 12px;
-    margin-right: 8px;
-    margin-top: -3px;
-    background-image: url(${Trash});
-  }
+
   &:active {
     border: 0.1rem solid rgba(255, 0, 0, 0.3);
   }
@@ -154,12 +144,13 @@ const StyledButton = styled.button`
       border-radius: 0.3rem;
       white-space: nowrap;
       margin-right: 1.8rem;
-      line-height: 26px;
+      line-height: 25px;
       font-size: 13px;
       cursor: pointer;
       font-family: Lato;
       -webkit-font-smoothing: antialiased;
-      > i {
+      > i,
+      > svg {
         margin-right: 1.3rem;
         padding-top: 1px;
         font-weight: 600;

@@ -1,16 +1,20 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+
+/* eslint-disable indent */
 
 const Wrapper = styled.div`
   ${({ isActive }) => {
     if (isActive) {
-      return css`
+      return `
         height: 3rem;
-        color: #1c5de7;
+        color: #007eff;
         font-weight: 600;
-        border-bottom: 2px solid #1c5de7;
+        border-bottom: 2px solid #007eff;
         z-index: 99;
       `;
     }
+
+    return '';
   }}
 `;
 

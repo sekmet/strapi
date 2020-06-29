@@ -1,6 +1,6 @@
 # Customization
 
-The administration panel can be customized according to your needs, so you can make it reflects your identity.
+The administration panel can be customized according to your needs, so you can make it reflect your identity.
 
 ::: warning
 To apply your changes you need to [rebuild](#build) your admin panel
@@ -26,6 +26,25 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 ```
 
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+
+## Change the host
+
+By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
+
+**Path —** `./config/environment/**/server.json`.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "host": "my-host"
+  }
+}
+```
 
 ## Development mode
 
@@ -67,44 +86,7 @@ const trads = {
 export default trads;
 ```
 
-**Path --** `my-app/admin/src/i18n.js`
-
-```js
-import { addLocaleData } from 'react-intl';
-import { reduce } from 'lodash';
-import en from 'react-intl/locale-data/en';
-import fr from 'react-intl/locale-data/fr';
-import trads from './translations';
-
-// We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
-const locales = {
-  en,
-  fr,
-};
-const languages = Object.keys(trads);
-
-/**
- * Dynamically generate `translationsMessages object`.
- */
-const translationMessages = reduce(
-  languages,
-  (result, language) => {
-    const obj = result;
-    obj[language] = trads[language];
-
-    if (locales[language]) {
-      addLocaleData(locales[language]);
-    }
-
-    return obj;
-  },
-  {}
-);
-
-export { languages, translationMessages };
-```
-
-::: note
+::: tip
 With this modification only English and French will be available in your admin
 :::
 
@@ -156,7 +138,7 @@ npm run build
 
 To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
 
-::: note
+::: tip
 make sure the size of your image is the same as the existing one (434px x 120px).
 :::
 
@@ -167,16 +149,37 @@ To disable the information box containing the tutorial videos, create a file at 
 Add the following configuration:
 
 ```js
+export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
+export const SETTINGS_BASE_URL = '/settings';
+```
+
+### Changing the port
+
+By default, the front-development server runs on the `8000` port. However, you can change this setting by updating the following configuration:
+
+**Path —** `./config/environment/**/server.json`.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "port": 3000
+  }
+}
 ```
 
 ## Build
 
 To build the administration, run the following command from the root directory of your project.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-build-dev"
+::: tab yarn
 
 ```
 yarn build
@@ -184,7 +187,7 @@ yarn build
 
 :::
 
-::: tab "npm" id="npm-build-dev"
+::: tab npm
 
 ```
 npm run build
@@ -192,7 +195,7 @@ npm run build
 
 :::
 
-::: tab "strapi" id="strapi-build-dev"
+::: tab strapi
 
 ```
 strapi build
@@ -204,9 +207,9 @@ strapi build
 
 you can build your admin panel with a specific configuration (located in the `./config/environments/**/server.json`) config by specifying a NODE_ENV as follows:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-build-prod"
+::: tab yarn
 
 ```
 NODE_ENV=production yarn build
@@ -214,7 +217,7 @@ NODE_ENV=production yarn build
 
 :::
 
-::: tab "npm" id="npm-build-prod"
+::: tab npm
 
 ```
 NODE_ENV=production npm run build
@@ -222,7 +225,7 @@ NODE_ENV=production npm run build
 
 :::
 
-::: tab "strapi" id="strapi-build-prod"
+::: tab strapi
 
 ```
 NODE_ENV=production strapi build

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+/* eslint-disable indent */
 const Wrapper = styled.div`
   margin-top: -6px;
   > div {
@@ -29,7 +30,7 @@ const Span = styled.span`
 const Flex = styled.div`
   display: flex;
   justify-content: flex-end;
-  padding: 0 0 12px 30px !important;
+  padding: 0 0 10px 30px !important;
   margin-top: -10px;
   color: #c3c5c8;
   font-size: 13px;
@@ -37,8 +38,7 @@ const Flex = styled.div`
 
 const Div = styled.div`
   width: calc(100% + 60px);
-  margin: ${props =>
-    props.show ? '-100px -30px 30px' : `-${props.number}px -30px 103px`};
+  margin: ${props => (props.show ? '-100px -30px 30px' : `-${props.number}px -30px 103px`)};
   background: #fff;
   box-shadow: 3px 2px 4px #e3e9f3;
   padding: 18px 30px 0px 30px;
@@ -48,6 +48,8 @@ const Div = styled.div`
         ? 'margin-top .3s ease-out, margin-bottom .2s ease-out'
         : 'margin .3s ease-in';
     }
+
+    return '';
   }};
 `;
 

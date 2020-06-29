@@ -7,33 +7,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { EditPageContext } from '../../contexts/EditPage';
 import Controller from '../Controller';
 
-import {
-  Banner,
-  Chevron,
-  ControllerWrapper,
-  Description,
-  Icon,
-  Name,
-  Wrapper,
-} from './Components';
+import { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper } from './Components';
 
 class Plugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { collapse: false };
+  state = { collapse: false, inputSelected: '' };
 
   static contextType = EditPageContext;
 
   componentDidMount() {
     // Open the application's permissions section if there are APIs
-    if (
-      this.props.name === 'application' &&
-      !isEmpty(get(this.props.plugin, 'controllers'))
-    ) {
+    if (this.props.name === 'application' && !isEmpty(get(this.props.plugin, 'controllers'))) {
       this.props.changePluginSelected('application');
       this.setState({ collapse: !this.state.collapse });
     }
@@ -61,9 +51,16 @@ class Plugin extends React.Component {
     }
   };
 
+  setInputSelectedState = name => {
+    this.setState({ inputSelected: name });
+  };
+
   render() {
+    const { appPlugins } = this.context;
+    const { plugin } = this.props;
     const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
-    const icon = get(this.props.plugin, ['information', 'logo']);
+    const pluginId = get(plugin, ['information', 'id'], null);
+    const icon = get(appPlugins, [pluginId, 'pluginLogo'], null);
     const emptyApplication = !isEmpty(get(this.props.plugin, 'controllers'));
 
     if (!emptyApplication) {
@@ -92,9 +89,9 @@ class Plugin extends React.Component {
             {emptyApplication && (
               <Chevron>
                 {this.state.collapse ? (
-                  <i className="fa fa-chevron-up" />
+                  <FontAwesomeIcon icon="chevron-up" />
                 ) : (
-                  <i className="fa fa-chevron-down" />
+                  <FontAwesomeIcon icon="chevron-down" />
                 )}
               </Chevron>
             )}
@@ -103,19 +100,18 @@ class Plugin extends React.Component {
         <Collapse isOpen={this.state.collapse}>
           <div />
           <ControllerWrapper>
-            {map(
-              get(this.props.plugin, 'controllers'),
-              (controllerActions, key) => (
-                <Controller
-                  inputNamePath={`permissions.${this.props.name}`}
-                  isOpen={this.state.collapse}
-                  key={key}
-                  name={key}
-                  actions={controllerActions}
-                  resetInputBackground={this.state.resetInputBackground}
-                />
-              )
-            )}
+            {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
+              <Controller
+                inputNamePath={`permissions.${this.props.name}`}
+                isOpen={this.state.collapse}
+                key={key}
+                inputSelected={this.state.inputSelected}
+                setInputSelected={this.setInputSelectedState}
+                name={key}
+                actions={controllerActions}
+                resetInputBackground={this.state.resetInputBackground}
+              />
+            ))}
           </ControllerWrapper>
         </Collapse>
       </Wrapper>

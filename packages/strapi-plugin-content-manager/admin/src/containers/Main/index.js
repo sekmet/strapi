@@ -1,57 +1,81 @@
-import React, { memo, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { Switch, Route } from 'react-router-dom';
-import {
-  LoadingIndicatorPage,
-  getQueryParameters,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-
 import pluginId from '../../pluginId';
-
 import DragLayer from '../../components/DragLayer';
-import EditView from '../EditView';
-import ListView from '../ListView';
-import SettingViewModel from '../SettingViewModel';
-import SettingViewGroup from '../SettingViewGroup';
-import SettingsView from '../SettingsView';
-
-import { getData, getLayout, resetProps } from './actions';
-import reducer from './reducer';
-import saga from './saga';
+import getRequestUrl from '../../utils/getRequestUrl';
+import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
+import {
+  deleteLayout,
+  deleteLayouts,
+  getDataSucceeded,
+  getLayoutSucceeded,
+  resetProps,
+} from './actions';
 import makeSelectMain from './selectors';
 
+const EditSettingsView = lazy(() => import('../EditSettingsView'));
+const CollectionTypeRecursivePath = lazy(() => import('../CollectionTypeRecursivePath'));
+const SingleTypeRecursivePath = lazy(() => import('../SingleTypeRecursivePath'));
+
 function Main({
-  getData,
-  getLayout,
-  groups,
-  groupsAndModelsMainPossibleMainFields,
+  deleteLayout,
+  deleteLayouts,
+  getDataSucceeded,
+  getLayoutSucceeded,
+  components,
+  componentsAndModelsMainPossibleMainFields,
   isLoading,
   layouts,
-  location: { pathname, search },
+  location: { pathname },
   global: { currentEnvironment, plugins },
   models,
   resetProps,
 }) {
-  strapi.useInjectReducer({ key: 'main', reducer, pluginId });
-  strapi.useInjectSaga({ key: 'main', saga, pluginId });
   const { emitEvent } = useGlobalContext();
-  const slug = pathname.split('/')[3];
-  const source = getQueryParameters(search, 'source');
+  const {
+    params: { slug },
+  } = useRouteMatch('/plugins/content-manager/:contentType/:slug');
   const getDataRef = useRef();
   const getLayoutRef = useRef();
   const resetPropsRef = useRef();
 
-  getDataRef.current = getData;
-  getLayoutRef.current = getLayout;
+  getDataRef.current = async () => {
+    try {
+      const [{ data: components }, { data: models }] = await Promise.all(
+        ['components', 'content-types'].map(endPoint =>
+          request(getRequestUrl(endPoint), { method: 'GET' })
+        )
+      );
+
+      getDataSucceeded(components, models, {
+        ...createPossibleMainFieldsForModelsAndComponents(components),
+        ...createPossibleMainFieldsForModelsAndComponents(models),
+      });
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  getLayoutRef.current = async uid => {
+    try {
+      const { data: layout } = await request(getRequestUrl(`content-types/${uid}`), {
+        method: 'GET',
+      });
+
+      getLayoutSucceeded(layout, uid);
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
   resetPropsRef.current = resetProps;
 
-  const shouldShowLoader =
-    slug !== 'ctm-configurations' && layouts[slug] === undefined;
+  const shouldShowLoader = !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
 
   useEffect(() => {
     getDataRef.current();
@@ -60,11 +84,12 @@ function Main({
       resetPropsRef.current();
     };
   }, [getDataRef]);
+
   useEffect(() => {
     if (shouldShowLoader) {
-      getLayoutRef.current(slug, source);
+      getLayoutRef.current(slug);
     }
-  }, [getLayoutRef, shouldShowLoader, slug, source]);
+  }, [getLayoutRef, shouldShowLoader, slug]);
 
   if (isLoading || shouldShowLoader) {
     return <LoadingIndicatorPage />;
@@ -73,11 +98,11 @@ function Main({
   const renderRoute = (props, Component) => (
     <Component
       currentEnvironment={currentEnvironment}
+      deleteLayout={deleteLayout}
+      deleteLayouts={deleteLayouts}
       emitEvent={emitEvent}
-      groups={groups}
-      groupsAndModelsMainPossibleMainFields={
-        groupsAndModelsMainPossibleMainFields
-      }
+      components={components}
+      componentsAndModelsMainPossibleMainFields={componentsAndModelsMainPossibleMainFields}
       layouts={layouts}
       models={models}
       plugins={plugins}
@@ -86,13 +111,11 @@ function Main({
   );
   const routes = [
     {
-      path: 'ctm-configurations/models/:name/:settingType',
-      comp: SettingViewModel,
+      path: 'ctm-configurations/edit-settings/:type/:componentSlug',
+      comp: EditSettingsView,
     },
-    { path: 'ctm-configurations/groups/:name', comp: SettingViewGroup },
-    { path: 'ctm-configurations/:type', comp: SettingsView },
-    { path: ':slug/:id', comp: EditView },
-    { path: ':slug', comp: ListView },
+    { path: 'singleType/:slug', comp: SingleTypeRecursivePath },
+    { path: 'collectionType/:slug', comp: CollectionTypeRecursivePath },
   ].map(({ path, comp }) => (
     <Route
       key={path}
@@ -104,26 +127,30 @@ function Main({
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
-      <Switch>{routes}</Switch>
+      <Suspense fallback={<LoadingIndicatorPage />}>
+        <Switch>{routes}</Switch>
+      </Suspense>
     </DndProvider>
   );
 }
 
 Main.propTypes = {
-  getData: PropTypes.func.isRequired,
-  getLayout: PropTypes.func.isRequired,
+  deleteLayout: PropTypes.func.isRequired,
+  deleteLayouts: PropTypes.func.isRequired,
+  getDataSucceeded: PropTypes.func.isRequired,
+  getLayoutSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
     plugins: PropTypes.object,
-  }),
-  groups: PropTypes.array.isRequired,
-  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
-  isLoading: PropTypes.bool,
+  }).isRequired,
+  components: PropTypes.array.isRequired,
+  componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string,
-  }),
+  }).isRequired,
   models: PropTypes.array.isRequired,
   resetProps: PropTypes.func.isRequired,
 };
@@ -133,19 +160,15 @@ const mapStateToProps = makeSelectMain();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      getData,
-      getLayout,
+      deleteLayout,
+      deleteLayouts,
+      getDataSucceeded,
+      getLayoutSucceeded,
       resetProps,
     },
     dispatch
   );
 }
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(
-  withConnect,
-  memo
-)(Main);
+export default compose(withConnect)(Main);

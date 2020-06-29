@@ -26,6 +26,10 @@ Before contributing, you will probably have to create a RFC on this [strapi/rfcs
 
 This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
+## Documentation
+
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+
 ## Bugs
 
 We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filing a new issue, try to make sure the problem does not already exist.
@@ -48,14 +52,14 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at v10.x.x only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+- You have [Node](https://nodejs.org/en/) at v10.10.0+ only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.0.0-beta.x/getting-started/install-requirements.html)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met)
 
 Then, please follow the instructions below:
 
@@ -79,25 +83,18 @@ cd strapi && yarn setup
 
 #### 4. Start the example application
 
-**Go to the getstarted application**
+Read the `getstarted` application README [here](./examples/getstarted/README.md).
 
-```bash
-cd strapi/examples/getstarted
-yarn develop
-```
+#### 5. Running the administration panel in development mode
 
-The server (API) is available at http://localhost:1337
-
-**WARNING** ⚠️ If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
-
-**Start the administration panel server**
+**Start the administration panel server for development**
 
 ```bash
 cd strapi/packages/strapi-admin
 yarn develop
 ```
 
-The administration panel is available at http://localhost:4000/admin
+The administration panel will be available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
@@ -150,13 +147,13 @@ Before submitting an issue you need to make sure:
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to [the official Strapi documentation](http://strapi.io).
   - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
-  - Ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
+  - Ask a question on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Your issue title is concise, on-topic and polite.
 - You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
   - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
-  - Make sure your issue body is readable and [well formated](https://guides.github.com/features/mastering-markdown).
+  - Make sure your issue body is readable and [well formatted](https://guides.github.com/features/mastering-markdown).
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
     - no dependencies are linked (e.g. you haven't run `npm link`)

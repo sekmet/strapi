@@ -1,13 +1,12 @@
 # Hooks
 
-The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, you will have to add the hook `strapi-hook-bookshelf` to be able to connect your app with your database.
+The hooks are modules that add functionality to the core. They are loaded during the server boot.
 
-**File structure**
+## Structure
+
+### File structure
 
 ```js
-const fs = require('fs');
-const path = require('path');
-
 module.exports = strapi => {
   const hook = {
     /**
@@ -24,7 +23,7 @@ module.exports = strapi => {
 
     async initialize() {
       // await someAsyncCode()
-      // this().defaults['your_config'] to access to your configs.
+      // const settings = {...this.defaults, ...strapi.config.hook.settings.**};
     },
   };
 
@@ -32,12 +31,12 @@ module.exports = strapi => {
 };
 ```
 
-- `defaults` (object): Contains the defaults configurations. This object is merged to `strapi.config.hook.settings.**`.
-- `initialize` (function): Called during the server boot. The callback `cb` needs to be called. Otherwise, the hook won't be loaded.
+- `defaults` (object): Contains the default configurations.
+- `initialize` (function): Called during the server boot.
+
+The [configurations](#configuration-and-activation) of the hook are accessible through `strapi.config.hook.settings.**`.
 
 The hooks are accessible through the `strapi.hook` variable.
-
-## Structure
 
 ### Node modules
 
@@ -56,7 +55,7 @@ A hook needs to follow the structure below:
 
 The `index.js` is the entry point to your hook. It should look like the example above.
 
-## Custom hooks
+### Custom hooks
 
 The framework allows to load hooks from the project directly without having to install them from npm. It's a great way to take advantage of the features of the hooks system for code that doesn't need to be shared between apps. To achieve this, you have to create a `./hooks` folder at the root of your project and put the hooks into it.
 
@@ -78,7 +77,7 @@ The framework allows to load hooks from the project directly without having to i
 
 ## Configuration and activation
 
-To activate and configure your hook with custom options, you need to edit your `./config/hook.json` file in your Strapi app.
+To activate and configure your hook with custom options, you need to edit your `./config/environments/**/hook.json` file in your Strapi app.
 
 ```javascript
 {
@@ -86,28 +85,6 @@ To activate and configure your hook with custom options, you need to edit your `
   "hook-name": {
     "enabled": true,
     ...
-  }
-}
-```
-
-## Dependencies
-
-It happens that a hook has a dependency to another one. For example, the `strapi-hook-bookshelf` has a dependency to `strapi-hook-knex`. Without it, the `strapi-hook-bookshelf` can't work correctly. It also means that the `strapi-hook-knex` hook has to be loaded before.
-
-To handle this case, you need to update the `package.json` at the root of your hook.
-
-```json
-{
-  "name": "strapi-hook-bookshelf",
-  "version": "x.x.x",
-  "description": "Bookshelf hook for the Strapi framework",
-  "dependencies": {
-    ...
-  },
-  "strapi": {
-    "dependencies": [
-      "strapi-hook-knex"
-    ]
   }
 }
 ```

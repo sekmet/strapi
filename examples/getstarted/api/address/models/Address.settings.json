@@ -1,5 +1,5 @@
 {
-  "connection": "default",
+  "kind": "collectionType",
   "collectionName": "addresses",
   "info": {
     "name": "address",
@@ -14,20 +14,41 @@
     "comment": ""
   },
   "attributes": {
-    "full_name": {
-      "type": "string"
-    },
-    "postal_code": {
-      "type": "string"
-    },
     "city": {
+      "type": "string",
+      "required": true
+    },
+    "postal_coder": {
       "type": "string"
     },
-    "geolocation": {
-      "type": "json"
+    "categories": {
+      "collection": "category",
+      "via": "addresses",
+      "dominant": true
     },
-    "country": {
-      "model": "country"
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "files",
+        "images",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false
+    },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images"
+      ],
+      "plugin": "upload",
+      "required": false
+    },
+    "full_name": {
+      "type": "string",
+      "required": true
     }
   }
 }

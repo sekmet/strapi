@@ -22,11 +22,13 @@ module.exports = () => {
     devServer: {
       port: 4000,
       clientLogLevel: 'none',
-      hot: true,
       quiet: true,
       historyApiFallback: {
         index: '/admin/',
+        disableDotRule: true,
       },
+      open: false,
+      openPage: '/admin',
     },
   };
 };

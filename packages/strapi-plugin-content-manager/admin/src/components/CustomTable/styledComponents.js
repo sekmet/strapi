@@ -1,4 +1,8 @@
+/* eslint-disable */
+import React from 'react';
 import styled, { css } from 'styled-components';
+import { Carret } from '@buffetjs/icons';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Table = styled.table`
   border-radius: 3px;
@@ -92,23 +96,14 @@ const TableRow = styled.tr`
   }
 `;
 
-const Icon = styled.i`
-  position: absolute;
-  top: 3px;
-  right: -12px;
+const Arrow = styled(({ isUp, ...rest }) => <Carret {...rest} />)`
+  margin-left: 5px;
+  ${({ isUp }) =>
+    isUp &&
+    `
+    transform: rotateZ(180deg);
 
-  ${({ isAsc }) => {
-    if (isAsc) {
-      return css`
-        &:before {
-          vertical-align: sub;
-        }
-      `;
-    }
-    return css`
-      transform: translateY(-3px) rotateZ(180deg);
-    `;
-  }}
+  `}
 `;
 
 const Truncate = styled.div``;
@@ -140,10 +135,12 @@ const TableDelete = styled.tr`
 const ActionContainer = styled.td`
   text-align: right;
 
-  i {
+  i,
+  svg {
     margin-left: 15px;
-    font-size: 1.1rem;
-    color: #0e1622;
+    font-size: 1rem;
+    height: 1rem;
+    color: #333740;
 
     &:first-of-type {
       margin-left: 0px;
@@ -152,13 +149,13 @@ const ActionContainer = styled.td`
 `;
 const DeleteSpan = styled.span`
   font-weight: 600;
+  -webkit-font-smoothing: antialiased;
   &:after {
     content: '—';
     margin: 0 7px;
     font-size: 13px;
     font-weight: 600;
   }
-  -webkit-font-smoothing: antialiased;
 `;
 
 const DeletAllSpan = styled.span`
@@ -169,20 +166,39 @@ const DeletAllSpan = styled.span`
   &:after {
     position: relative;
     top: -1px;
-    content: '\f1f8';
+    content: '\f2ed';
     margin-left: 7px;
-    // margin-top: -10px;
-    font-size: 13px;
+    font-size: 10px;
     font-family: FontAwesome;
     -webkit-font-smoothing: antialiased;
   }
 `;
 
+const LoadingContainer = styled.div`
+  display: block;
+  margin: auto;
+`;
+
+const LoadingWrapper = styled.div`
+  width: 100%;
+  height: 108px;
+  display: flex;
+  background: ${props => props.theme.main.colors.white};
+  box-shadow: 0 2px 4px ${props => props.theme.main.colors.darkGrey};
+  clip-path: inset(0px -5px -5px -5px);
+`;
+
+LoadingWrapper.propTypes = {
+  ...themePropTypes,
+};
+
 export {
   ActionContainer,
+  Arrow,
   DeletAllSpan,
   DeleteSpan,
-  Icon,
+  LoadingContainer,
+  LoadingWrapper,
   Table,
   TableDelete,
   TableEmpty,

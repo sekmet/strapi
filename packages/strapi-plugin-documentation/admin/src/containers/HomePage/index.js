@@ -7,21 +7,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectIntl } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
-
-// Components
+import { Header } from '@buffetjs/custom';
 import {
   auth,
-  PluginHeader,
   PopUpWarning,
   LoadingIndicatorPage,
   InputsIndex as Input,
+  GlobalContext,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
 import Block from '../../components/Block';
 import Row from '../../components/Row';
@@ -39,10 +38,7 @@ import {
 } from './actions';
 // Selectors
 import selectHomePage from './selectors';
-import reducer from './reducer';
 import saga from './saga';
-
-const makeTranslation = txt => `${pluginId}.containers.HomePage.${txt}`;
 
 export class HomePage extends React.Component {
   componentDidMount() {
@@ -58,28 +54,36 @@ export class HomePage extends React.Component {
   getPluginHeaderActions = () => {
     return [
       {
-        label: makeTranslation('Button.open'),
+        color: 'none',
+        label: this.context.formatMessage({
+          id: getTrad('containers.HomePage.Button.open'),
+        }),
         className: 'buttonOutline',
         onClick: this.openCurrentDocumentation,
         type: 'button',
+        key: 'button-open',
       },
       {
-        label: makeTranslation('Button.update'),
-        kind: 'primary',
+        label: this.context.formatMessage({
+          id: getTrad('containers.HomePage.Button.update'),
+        }),
+        color: 'success',
         onClick: () => {},
         type: 'submit',
+        key: 'button-submit',
       },
     ];
   };
 
   handleCopy = () => {
-    strapi.notification.info(makeTranslation('copied'));
+    strapi.notification.info(getTrad('containers.HomePage.copied'));
   };
 
   openCurrentDocumentation = () => {
-    const { currentDocVersion } = this.props;
+    const { currentDocVersion, prefix } = this.props;
+    const slash = prefix.startsWith('/') ? '' : '/';
 
-    return openWithNewTab(`/documentation/v${currentDocVersion}`);
+    return openWithNewTab(`${slash}${prefix}/v${currentDocVersion}`);
   };
 
   shouldHideInput = inputName => {
@@ -127,6 +131,8 @@ export class HomePage extends React.Component {
     );
   };
 
+  static contextType = GlobalContext;
+
   render() {
     const {
       docVersions,
@@ -136,6 +142,7 @@ export class HomePage extends React.Component {
       onSubmit,
       versionToDelete,
     } = this.props;
+    const { formatMessage } = this.context;
 
     if (isLoading) {
       return <LoadingIndicatorPage />;
@@ -148,18 +155,24 @@ export class HomePage extends React.Component {
           toggleModal={this.toggleModal}
           content={{
             title: 'components.popUpWarning.title',
-            message: makeTranslation('PopUpWarning.message'),
+            message: getTrad('containers.HomePage.PopUpWarning.message'),
             cancel: 'app.components.Button.cancel',
-            confirm: makeTranslation('PopUpWarning.confirm'),
+            confirm: getTrad('containers.HomePage.PopUpWarning.confirm'),
           }}
           popUpWarningType="danger"
           onConfirm={onConfirmDeleteDoc}
         />
         <form onSubmit={onSubmit}>
-          <PluginHeader
+          <Header
             actions={this.getPluginHeaderActions()}
-            title={{ id: makeTranslation('PluginHeader.title') }}
-            description={{ id: makeTranslation('PluginHeader.description') }}
+            title={{
+              label: formatMessage({
+                id: getTrad('containers.HomePage.PluginHeader.title'),
+              }),
+            }}
+            content={formatMessage({
+              id: getTrad('containers.HomePage.PluginHeader.description'),
+            })}
           />
           <StyledRow className="row">
             <Block>
@@ -172,16 +185,16 @@ export class HomePage extends React.Component {
                     value={auth.getToken()}
                     type="string"
                     onChange={() => {}}
-                    label={{ id: makeTranslation('form.jwtToken') }}
+                    label={{ id: getTrad('containers.HomePage.form.jwtToken') }}
                     inputDescription={{
-                      id: makeTranslation('form.jwtToken.description'),
+                      id: getTrad('containers.HomePage.form.jwtToken.description'),
                     }}
                   />
                 </div>
               </CopyToClipboard>
             </Block>
             <Block>{form.map(this.renderForm)}</Block>
-            <Block title={makeTranslation('Block.title')}>
+            <Block title={getTrad('containers.HomePage.Block.title')}>
               <VersionWrapper>
                 <Row isHeader />
                 {docVersions.map(this.renderRow)}
@@ -206,6 +219,7 @@ HomePage.defaultProps = {
   onConfirmDeleteDoc: () => {},
   onSubmit: () => {},
   onUpdateDoc: () => {},
+  prefix: '/documentation',
   versionToDelete: '',
 };
 
@@ -222,6 +236,7 @@ HomePage.propTypes = {
   onConfirmDeleteDoc: PropTypes.func,
   onSubmit: PropTypes.func,
   onUpdateDoc: PropTypes.func,
+  prefix: PropTypes.string,
   versionToDelete: PropTypes.string,
 };
 
@@ -241,19 +256,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
-const withReducer = strapi.injectReducer({
-  key: 'homePage',
-  reducer,
-  pluginId,
-});
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(injectIntl(HomePage));
+export default compose(withSaga, withConnect)(HomePage);

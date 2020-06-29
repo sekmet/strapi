@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-const glob = require('./glob');
 const _ = require('lodash');
+const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
 /**
@@ -18,11 +18,7 @@ const filePathToPath = require('./filepath-to-prop-path');
 const loadFiles = async (
   dir,
   pattern,
-  {
-    requireFn = require,
-    shouldUseFileNameAsKey = () => true,
-    globArgs = {},
-  } = {}
+  { requireFn = require, shouldUseFileNameAsKey = () => true, globArgs = {} } = {}
 ) => {
   const root = {};
   const files = await glob(pattern, { cwd: dir, ...globArgs });
@@ -33,6 +29,13 @@ const loadFiles = async (
     // load module
     delete require.cache[absolutePath];
     const mod = requireFn(absolutePath);
+
+    Object.defineProperty(mod, '__filename__', {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: path.basename(file),
+    });
 
     const propPath = filePathToPath(file, shouldUseFileNameAsKey(file));
 

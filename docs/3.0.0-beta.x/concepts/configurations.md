@@ -1,14 +1,16 @@
+---
+sidebarDepth: 2
+---
+
 # Configurations
 
 The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
 
-::: note
-Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
-:::
-
 ## Application
 
 Contains the main configurations relative to your project.
+
+These configurations are accessible through `strapi.config.favicon` and `strapi.config.public`.
 
 **Path —** `./config/application.json`.
 
@@ -20,7 +22,8 @@ Contains the main configurations relative to your project.
   },
   "public": {
     "path": "./public",
-    "maxAge": 60000
+    "maxAge": 60000,
+    "defaultIndex": true
   }
 }
 ```
@@ -31,29 +34,28 @@ Contains the main configurations relative to your project.
 - `public`
   - `path` (string): Path to the public folder. Default value: `./public`.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+  - `defaultIndex` (boolean): Display default index page at `/` and `/index.html`. Default value: `true`.
 
 ## Custom
 
 Add custom configurations to the project. The content of this file is available through the `strapi.config` object.
 
-#### Example
-
 **Path —** `./config/custom.json`.
 
 ```json
 {
-  "backendURL": "http://www.strapi.io",
+  "providerURL": "https://provider.com",
   "mainColor": "blue"
 }
 ```
 
-These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
+These configurations are accessible through `strapi.config.providerURL` and `strapi.config.mainColor`.
 
 ## Functions
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
 
-All functions that are expose in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
+All functions that are exposed in this folder are accessible via `strapi.config.functions['fileName']();`
 
 ### Bootstrap
 
@@ -65,10 +67,9 @@ Here are some use cases:
 
 - Create an admin user if there isn't one.
 - Fill the database with some necessary data.
-- Check that the database is up-and-running.
-- Load some envrionments variables.
+- Load some environment variables.
 
-The bootstrap function can be synchronous or asynchronous
+The bootstrap function can be synchronous or asynchronous.
 
 **Synchronous**
 
@@ -86,7 +87,7 @@ module.exports = () => {
 };
 ```
 
-**Be async**
+**Asynchronous**
 
 ```js
 module.exports = async () => {
@@ -100,7 +101,7 @@ CRON tasks allow you to schedule jobs (arbitrary functions) for execution at spe
 
 This feature is powered by [`node-schedule`](https://www.npmjs.com/package/node-schedule) node modules. Check it for more information.
 
-::: note
+::: warning
 Make sure the `enabled` cron config is set to `true` in `./config/environments/**/server.json` file.
 :::
 
@@ -130,21 +131,18 @@ module.exports = {
    */
 
   '0 0 1 * * 1': () => {
-    // Add your own logic here (eg. send a queue of email, create a database backup, etc.).
+    // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
   },
 };
 ```
 
 ### Database ORM customization
 
-- **Path —** `./config/functions/bookshelf.js`.
-- **Path —** `./config/functions/mongoose.js`.
-
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Mongoose" id="mongoose"
+::: tab Mongoose
 
 As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
 
@@ -162,7 +160,7 @@ module.exports = (mongoose, connection) => {
 
 :::
 
-::: tab "Bookshelf" id="bookshelf"
+::: tab Bookshelf
 
 Another example would be using the `bookshelf-uuid` plugin for MySQL, you can register it like this:
 
@@ -184,22 +182,28 @@ module.exports = (bookshelf, connection) => {
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
-::: note
+To start your application in production environement you will have to specify `NODE_ENV=production`.
+
+::: tip
 You can access the config of the current environment through `strapi.config.currentEnvironment`.
 :::
 
 ## Database
 
+This file lets you define database connections that will be used to store your application content.
+
+You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
+
 **Path —** `./config/environments/**/database.json`.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Bookshelf" id="bookshelf"
+::: tab Bookshelf
 
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-bookshelf`.
+    - `connector` (string): Connector used by the current connection. Will be `bookshelf`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
       - `host` (string): Database host name. Default value: `localhost`.
@@ -208,29 +212,29 @@ You can access the config of the current environment through `strapi.config.curr
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
       - `options` (object): List of additional options used by the connector.
-      - `timezone` (string): Set the default behavior for local time. Default value: `utc`.
-      - `schema` (string): Set the default database schema. **Used only for Postgres DB**
+      - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
+      - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
       - `ssl` (boolean): For ssl database connection.
-  - `options` Options used for database connection.
-    - `debug` (boolean): Show database exchanges and errors.
-    - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
-    - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
-      - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
-      - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
-      - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
-      - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
-      - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
-      - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
-      - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
+    - `options` Options used for database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
+      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
+        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
+        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
+        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
+        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
+        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
+        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
 
 :::
 
-::: tab "Mongoose" id="mongoose"
+::: tab Mongoose
 
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-mongoose`.
+    - `connector` (string): Connector used by the current connection. Will be `mongoose`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. Will be `mongo`.
       - `host` (string): Database host name. Default value: `localhost`.
@@ -238,10 +242,11 @@ You can access the config of the current environment through `strapi.config.curr
       - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
-  - `options` Options used for database connection.
-    - `ssl` (boolean): For ssl database connection.
-    - `debug` (boolean): Show database exchanges and errors.
-    - `authenticationDatabase` (string): Connect with authentication.
+      - `uri` (string): This can overide all previous configurations - _optional_
+    - `options` Options used for database connection.
+      - `ssl` (boolean): For ssl database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `authenticationDatabase` (string): Connect with authentication.
 
 :::
 
@@ -251,16 +256,16 @@ You can access the config of the current environment through `strapi.config.curr
 
 **Path —** `./config/environments/**/database.json`.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Postgres" id="postgres"
+::: tab Postgres
 
 ```json
 {
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "localhost",
@@ -280,14 +285,14 @@ You can access the config of the current environment through `strapi.config.curr
 
 :::
 
-::: tab "MySQL" id="mysql"
+::: tab MySQL
 
 ```json
 {
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "mysql",
         "host": "localhost",
@@ -304,14 +309,14 @@ You can access the config of the current environment through `strapi.config.curr
 
 :::
 
-::: tab "SQLite" id="sqlite"
+::: tab SQLite
 
 ```json
 {
   "defaultConnection": "default",
   "connections": {
-    "sqlite": {
-      "connector": "strapi-hook-bookshelf",
+    "default": {
+      "connector": "bookshelf",
       "settings": {
         "client": "sqlite",
         "filename": ".tmp/data.db"
@@ -326,14 +331,14 @@ You can access the config of the current environment through `strapi.config.curr
 
 :::
 
-::: tab "Mongo" id="mongo"
+::: tab Mongo
 
 ```json
 {
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "client": "mongo",
         "host": "localhost",
@@ -355,11 +360,11 @@ You can access the config of the current environment through `strapi.config.curr
 
 ::::
 
-::: note
+::: tip
 Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 :::
 
-::: note
+::: tip
 Take a look at the [database's guide](../guides/databases.md) for more details.
 :::
 
@@ -383,7 +388,7 @@ Take a look at the [database's guide](../guides/databases.md) for more details.
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
 
-::: note
+::: tip
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 :::
 
@@ -438,14 +443,15 @@ The session doesn't work with `mongo` as a client. The package that we should us
 - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
 - `proxy`
   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-  - `ssl` (boolean): Enable proxy SSL support
+  - `ssl` (boolean): Enable proxy SSL support.
   - `host` (string): Host name your proxy service uses for Strapi.
   - `port` (integer): Port that your proxy service accepts connections on.
 - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
 - `admin`
-  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
-  - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
+  - `autoOpen` (boolean): Enable or disabled administration opening on start. Default value: `true`.
+  - `path` (string): Allow to change the URL to access the admin panel. Default value: `/admin`.
+  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
   - `build`
     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
 
@@ -453,7 +459,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 **Path —** `./config/environments/**/server.json`.
 
-As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`
+As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`.
 
 **Note:** you will need to configure Nginx or Apache as a proxy before configuring this example.
 
@@ -475,15 +481,15 @@ As an example using this configuration with Nginx your server would respond to `
 
 ## Dynamic configurations
 
-For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
+For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configuration files. To enable this feature in JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
 
 ### Syntax
 
 The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
 
-#### Usage
+### Usage
 
-In any JSON configurations files in your project, you can inject dynamic values like this:
+In any JSON configuration file in your project, you can inject dynamic values like this:
 
 **Path —** `./config/environments/production/database.json`.
 
@@ -492,7 +498,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "client": "mongo",
         "uri": "${process.env.DATABASE_URI || ''}",
@@ -508,7 +514,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
 }
 ```
 
-::: note
+::: tip
 You can't execute functions inside the curly braces. Only strings are allowed.
 :::
 

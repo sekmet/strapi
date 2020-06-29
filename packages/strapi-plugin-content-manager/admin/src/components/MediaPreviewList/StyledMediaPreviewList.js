@@ -72,7 +72,8 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
       font-size: 10px;
       font-weight: 600;
     }
-    i {
+    i,
+    svg {
       position: absolute;
       left: 1px;
       top: -1px;
@@ -93,7 +94,6 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
     position: absolute;
     left: 120%;
     bottom: -10px;
-    display: none;
     max-width: 150px;
     color: #333740;
   }
